@@ -8,80 +8,54 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// Health check - ОБЯЗАТЕЛЬНО для Render
+// Health check
 app.get('/', (req, res) => {
   res.json({ 
-    status: '🚀 StokeShop API is running!',
-    timestamp: new Date().toISOString(),
-    endpoints: [
-      'POST /api/create-invoice',
-      'POST /api/check-invoice'
-    ]
+    status: '🚀 API WORKING!', 
+    message: 'StokeShop Backend is running!',
+    timestamp: new Date().toISOString()
   });
 });
 
-// Create invoice endpoint
+// Create invoice - ПРОСТАЯ ВЕРСИЯ
 app.post('/api/create-invoice', (req, res) => {
-  try {
-    const { amount, asset, description } = req.body;
-    
-    console.log('📨 Creating invoice for amount:', amount);
-    
-    const invoice = {
-      invoice_id: 'render_' + Date.now(),
-      hash: 'rh_' + Math.random().toString(36).substr(2, 9),
-      asset: asset || 'USDT',
-      amount: parseFloat(amount),
-      pay_url: `https://t.me/CryptoBot?start=render_${Date.now()}`,
-      description: description || 'Пополнение баланса StokeShop',
-      status: 'active',
-      created_at: new Date().toISOString(),
-      expiration_date: new Date(Date.now() + 3600000).toISOString()
-    };
-    
-    console.log('✅ Invoice created:', invoice.invoice_id);
-    res.json({ success: true, invoice });
-    
-  } catch (error) {
-    console.error('❌ Error creating invoice:', error);
-    res.status(500).json({ success: false, error: error.message });
-  }
+  console.log('📨 Create invoice request:', req.body);
+  
+  const invoice = {
+    invoice_id: 'test_' + Date.now(),
+    hash: 'h_' + Math.random().toString(36).substr(2, 9),
+    asset: req.body.asset || 'USDT',
+    amount: parseFloat(req.body.amount),
+    pay_url: `https://t.me/CryptoBot?start=test_${Date.now()}`,
+    description: req.body.description || 'Пополнение баланса',
+    status: 'active',
+    created_at: new Date().toISOString(),
+    expiration_date: new Date(Date.now() + 3600000).toISOString()
+  };
+  
+  console.log('✅ Invoice created:', invoice.invoice_id);
+  res.json({ success: true, invoice });
 });
 
-// Check invoice endpoint
+// Check invoice - ПРОСТАЯ ВЕРСИЯ
 app.post('/api/check-invoice', (req, res) => {
-  try {
-    const { invoice_id } = req.body;
-    
-    console.log('🔍 Checking invoice:', invoice_id);
-    
-    const invoice = {
-      invoice_id: invoice_id,
-      status: Math.random() > 0.7 ? 'paid' : 'active',
-      hash: 'rchk_' + Math.random().toString(36).substr(2, 9),
-      asset: 'USDT',
-      amount: 10.0,
-      pay_url: `https://t.me/CryptoBot?start=check_render_${invoice_id}`,
-      created_at: new Date().toISOString(),
-      paid_at: Math.random() > 0.7 ? new Date().toISOString() : null
-    };
-    
-    console.log('✅ Invoice status:', invoice.status);
-    res.json({ success: true, invoice });
-    
-  } catch (error) {
-    console.error('❌ Error checking invoice:', error);
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
-
-// Handle 404
-app.use('*', (req, res) => {
-  res.status(404).json({ error: 'Route not found', path: req.originalUrl });
+  console.log('🔍 Check invoice request:', req.body);
+  
+  const invoice = {
+    invoice_id: req.body.invoice_id,
+    status: Math.random() > 0.7 ? 'paid' : 'active',
+    hash: 'chk_' + Math.random().toString(36).substr(2, 9),
+    asset: 'USDT',
+    amount: 10.0,
+    pay_url: `https://t.me/CryptoBot?start=check_${req.body.invoice_id}`,
+    created_at: new Date().toISOString()
+  };
+  
+  console.log('✅ Invoice status:', invoice.status);
+  res.json({ success: true, invoice });
 });
 
 // Start server
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`✅ Render server running on port ${PORT}`);
-  console.log(`✅ Health check: http://0.0.0.0:${PORT}/`);
+app.listen(PORT, () => {
+  console.log(`✅ Server running on port ${PORT}`);
 });
